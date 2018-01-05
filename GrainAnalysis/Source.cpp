@@ -7,9 +7,9 @@ using namespace cv;
 using namespace std;
 
 /// Mat variables
-Mat cal, cal_gray, src, src_gray, dst;
+Mat bg, cal_raw, cal, cal_gray, src_raw, src, src_gray, dst;
 /// Variables for Threshold
-int threshold_value = 235;
+int threshold_value = 125;
 int const max_BINARY_value = 255;
 /// Variables for erode and dilate
 int const erode_dilate_factor = 2;
@@ -31,12 +31,19 @@ void ProcessImage();
 
 int main(int argc, char** argv)
 {
-	/// Load calibration and input images
-	cal = imread("..//data/calibration.jpg", IMREAD_COLOR);
-	src = imread("../data/grain.jpg", IMREAD_COLOR);
-	/// Check calibration and input images were loaded successfully
-	if (cal.empty()) return -1;
-	if (src.empty()) return -1;
+	/// Load input and background images
+	src_raw = imread("..//data/grainImage.jpg", IMREAD_COLOR);
+	cal_raw = imread("..//data/grainCalibration.jpg", IMREAD_COLOR);
+	bg = imread("..//data/grainBackground.jpg", IMREAD_COLOR);
+	/// Check images were loaded successfully
+	if (src_raw.empty()) return -1;
+	if (cal_raw.empty()) return -1;
+	if (bg.empty()) return -1;
+	/// Subtract background from input image
+	src = bg - src_raw;
+	src = Scalar::all(255) - src;
+	cal = bg - cal_raw;
+	cal = Scalar::all(255) - cal;
 	/// Convert calibration and input images to grayscale
 	cvtColor(cal, cal_gray, COLOR_BGR2GRAY);
 	cvtColor(src, src_gray, COLOR_BGR2GRAY);
@@ -48,6 +55,7 @@ int main(int argc, char** argv)
 
 	Calibration();
 	ProcessImage();
+
 
 	/// ESC to exit program
 	while(true)
